@@ -52,7 +52,7 @@ def _resolve_google_credentials_file():
 SECRET_KEY = os.environ.get("EDS_SECRET_KEY") or secrets.token_urlsafe(32)
 
 # Password admin staff use to reach the admissions dashboard.
-ADMIN_PASSWORD = os.environ.get("EDS_ADMIN_PASSWORD", "")
+ADMIN_PASSWORD = os.environ.get("EDS_ADMIN_PASSWORD", "Eds_2026@admin")
 
 # Password students use to reach the notes/resources page.
 STUDENT_PASSWORD = os.environ.get("EDS_STUDENT_PASSWORD", "")

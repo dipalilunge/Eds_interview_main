@@ -5,6 +5,14 @@ import unittest
 
 
 class StreamlitFreeDeployConfigTests(unittest.TestCase):
+    def test_default_admin_password_is_configured(self):
+        os.environ.pop("EDS_ADMIN_PASSWORD", None)
+
+        import config
+        importlib.reload(config)
+
+        self.assertEqual(config.ADMIN_PASSWORD, "Eds_2026@admin")
+
     def test_env_overrides_support_streamlit_secret_mode(self):
         os.environ["EDS_ADMIN_PASSWORD"] = "streamlit-admin"
         os.environ["EDS_STUDENT_PASSWORD"] = "streamlit-student"
