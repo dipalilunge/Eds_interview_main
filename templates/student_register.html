@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Create student account — {{ institute.name }}{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+  <a class="auth-shell__brand" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="{{ institute.name }} logo">
+    <span>{{ institute.name }}</span>
+  </a>
+  <div class="auth-card">
+    <p class="section-label">— Create Account —</p>
+    <h2>Student registration</h2>
+    <p class="auth-card__hint">Create an account to access course notes and resources.</p>
+    <form method="POST" class="auth-form">
+      <label for="name">Full name</label>
+      <input type="text" id="name" name="name" required autofocus>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+
+      <label for="password_confirm">Confirm password</label>
+      <input type="password" id="password_confirm" name="password_confirm" required>
+
+      <button type="submit" class="btn btn--primary">Create account</button>
+    </form>
+
+    <p style="margin-top:1rem">Already have an account? <a href="{{ url_for('student_login') }}">Sign in</a></p>
+    <a class="auth-card__back" href="{{ url_for('home') }}">&larr; Back to homepage</a>
+  </div>
+</div>
+{% endblock %}

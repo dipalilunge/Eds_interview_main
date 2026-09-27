@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Admin login — {{ institute.name }}{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+  <a class="auth-shell__brand" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="{{ institute.name }} logo">
+    <span>{{ institute.name }}</span>
+  </a>
+  <div class="auth-card">
+    <p class="section-label">— Staff Access —</p>
+    <h2>Admissions dashboard</h2>
+    <p class="auth-card__hint">Sign in to record new admissions and view recent entries.</p>
+    <form method="POST" class="auth-form">
+      <label for="password">Admin password</label>
+      <input type="password" id="password" name="password" required autofocus>
+      <button type="submit" class="btn btn--primary">Sign in</button>
+    </form>
+    <a class="auth-card__back" href="{{ url_for('home') }}">&larr; Back to homepage</a>
+  </div>
+</div>
+{% endblock %}

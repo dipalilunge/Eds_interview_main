@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}{{ institute.name }} — {{ institute.tagline }}{% endblock %}
+{% block body_class %}page-home{% endblock %}
+
+{% block content %}
+
+<div class="ticker">
+  <div class="ticker__track">
+    {% for note in notifications %}
+      <span class="ticker__item">{{ note }}</span>
+    {% endfor %}
+    {% for note in notifications %}
+      <span class="ticker__item" aria-hidden="true">{{ note }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<header class="nav">
+  <a class="nav__brand" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="{{ institute.name }} logo">
+    <span>{{ institute.name }}</span>
+  </a>
+  <nav class="nav__links">
+    <a href="#courses">Courses</a>
+    <a href="{{ url_for('career.index') }}">Career</a>
+    <a href="#contact">Contact</a>
+    <a href="{{ url_for('student_login') }}">Student portal</a>
+    <a class="nav__cta" href="{{ url_for('admin_login') }}">Admin</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero__grid" aria-hidden="true"></div>
+  <div class="hero__gear hero__gear--one" aria-hidden="true">{% include "partials/gear.svg" %}</div>
+  <div class="hero__gear hero__gear--two" aria-hidden="true">{% include "partials/gear.svg" %}</div>
+  <div class="hero__content">
+    <p class="eyebrow">Technical &amp; Industrial Training Institute</p>
+    <div class="hero__brand">
+      <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="{{ institute.name }} logo">
+      <div class="hero__brand-text">
+        <h1>{{ institute.name }}</h1>
+        <p class="hero__tagline">Engineering minds. Designing futures.</p>
+      </div>
+    </div>
+    <p class="hero__lede">{{ institute.tagline }} We train students in mechanical CAD tools and software development, data science, AI — taught by practitioners, built for placement.</p>
+    <div class="hero__actions">
+      <a href="#courses" class="btn btn--primary">Explore courses</a>
+      <a href="#contact" class="btn btn--ghost">Book a seat</a>
+    </div>
+  </div>
+</section>
+
+<section class="tracks" id="courses">
+  <p class="section-label">— Courses —</p>
+  <h2>Four disciplines. One studio.</h2>
+
+  <div class="track-block">
+    <div class="track-block__head">
+      <h3>Mechanical Design</h3>
+      <span class="track-block__count">{{ mech_courses|length }} courses</span>
+    </div>
+    <div class="course-grid">
+      {% for c in mech_courses %}
+      <article class="course-card course-card--mech">
+        <span class="course-card__id">{{ loop.index }}</span>
+        <h4>{{ c.name }}</h4>
+        <p>{{ c.summary }}</p>
+        <div class="course-card__meta">
+          <span>{{ c.duration }}</span>
+          <span class="course-card__fee">₹{{ "{:,}".format(c.fee) }}</span>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="track-block">
+    <div class="track-block__head">
+      <h3>IT &amp; Software</h3>
+      <span class="track-block__count">{{ it_courses|length }} courses</span>
+    </div>
+    <div class="course-grid">
+      {% for c in it_courses %}
+      <article class="course-card">
+        <span class="course-card__id">{{ loop.index }}</span>
+        <h4>{{ c.name }}</h4>
+        <p>{{ c.summary }}</p>
+        <div class="course-card__meta">
+          <span>{{ c.duration }}</span>
+          <span class="course-card__fee">₹{{ "{:,}".format(c.fee) }}</span>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="track-block">
+    <div class="track-block__head">
+      <h3>Civil Design</h3>
+      <span class="track-block__count">{{ civil_courses|length }} courses</span>
+    </div>
+    <div class="course-grid">
+      {% for c in civil_courses %}
+      <article class="course-card">
+        <span class="course-card__id">{{ loop.index }}</span>
+        <h4>{{ c.name }}</h4>
+        <p>{{ c.summary }}</p>
+        <div class="course-card__meta"><span>{{ c.duration }}</span><span class="course-card__fee">₹{{ "{:,}".format(c.fee) }}</span></div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="track-block">
+    <div class="track-block__head">
+      <h3>Electrical Design</h3>
+      <span class="track-block__count">{{ electrical_courses|length }} courses</span>
+    </div>
+    <div class="course-grid">
+      {% for c in electrical_courses %}
+      <article class="course-card">
+        <span class="course-card__id">{{ loop.index }}</span>
+        <h4>{{ c.name }}</h4>
+        <p>{{ c.summary }}</p>
+        <div class="course-card__meta"><span>{{ c.duration }}</span><span class="course-card__fee">₹{{ "{:,}".format(c.fee) }}</span></div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+
+</section>
+
+<section class="contact" id="contact">
+  <p class="section-label">— Reach Us —</p>
+  <h2>Visit the studio.</h2>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <h4>Address</h4>
+      <p>{{ institute.address }}</p>
+    </div>
+    <div class="contact-card">
+      <h4>Phone</h4>
+      <p>{{ institute.phone }}</p>
+    </div>
+    <div class="contact-card">
+      <h4>Email</h4>
+      <p>{{ institute.email }}</p>
+    </div>
+    <div class="contact-card">
+      <h4>Hours</h4>
+      <p>{{ institute.hours }}</p>
+    </div>
+  </div>
+  <div class="map-embed">
+    <iframe
+      title="Studio location map"
+      loading="lazy"
+      allowfullscreen
+      referrerpolicy="no-referrer-when-downgrade"
+      src="https://maps.google.com/maps?q={{ institute.map_query|urlencode }}&output=embed">
+    </iframe>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer__brand">
+    <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="{{ institute.name }} logo">
+    <span>{{ institute.name }}</span>
+  </div>
+  <p>&copy; {{ institute.name }}. Built for training the next batch of engineers.</p>
+</footer>
+
+<div class="faq-widget" id="faq-widget">
+  <button class="faq-widget__toggle" id="faq-toggle" aria-expanded="false" aria-controls="faq-panel">
+    <span class="faq-widget__toggle-icon">?</span>
+    <span class="faq-widget__toggle-label">Ask a question</span>
+  </button>
+  <div class="faq-panel" id="faq-panel" hidden>
+    <div class="faq-panel__head">
+      <span>Course &amp; admission help</span>
+      <button id="faq-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="faq-panel__body" id="faq-log">
+      <div class="faq-msg faq-msg--bot">Ask me about fees, courses, timings or admissions.</div>
+    </div>
+    <form class="faq-panel__form" id="faq-form">
+      <input type="text" id="faq-input" placeholder="e.g. What is the fee for Python?" autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/faq.js') }}"></script>
+{% endblock %}

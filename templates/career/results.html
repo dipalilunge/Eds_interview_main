@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Interview Result</title>
+  <link rel="stylesheet" href="{{ url_for('career.static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><img class="eds-logo" src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="EDS logo"><span class="brand-copy"><strong>Interview Result</strong><span>{{ interview.student_name }} · {{ interview.subject.name }}</span></span></div>
+  <a href="{{ url_for('career.index') }}">New Interview</a>
+</header>
+
+<main class="container">
+  <section class="result-card">
+    <p class="eyebrow">FINAL RESULT</p>
+    <h1>{{ interview.subject.name }}</h1>
+    <div class="big-score">{{ interview.total_score if interview.total_score is not none else "Pending" }}{% if interview.total_score is not none %}%{% endif %}</div>
+    <p>Teacher evaluation determines the final score.</p>
+  </section>
+
+  {% for iq in questions %}
+  <article class="result-row">
+    <div>
+      <b>Q{{ iq.question_order }}. {{ iq.question.text }}</b>
+      <p>{{ iq.teacher_comment or "No teacher comment yet." }}</p>
+    </div>
+    <strong>
+      {% if iq.technical_score is not none %}
+        {{ ((iq.technical_score + iq.communication_score + iq.relevance_score) / 15 * 100)|round(1) }}%
+      {% else %}
+        Pending
+      {% endif %}
+    </strong>
+  </article>
+  {% endfor %}
+</main>
+</body>
+</html>

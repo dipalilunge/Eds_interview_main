@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Student portal — {{ institute.name }}{% endblock %}
+{% block body_class %}page-dashboard{% endblock %}
+
+{% block content %}
+<header class="dash-nav">
+  <a class="nav__brand" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="{{ institute.name }} logo">
+    <span>{{ institute.name }}</span>
+  </a>
+  <div class="dash-nav__right">
+    <a href="{{ url_for('career.index') }}" class="btn btn--ghost btn--small">Career</a>
+    <a href="{{ url_for('student_logout') }}" class="btn btn--ghost btn--small">Log out</a>
+  </div>
+</header>
+
+<main class="dash dash--single">
+  <section class="dash-panel">
+    {% if student %}
+    <p style="margin-bottom:1rem;font-weight:700">Welcome, {{ student.name }}.</p>
+    {% endif %}
+    {% if enrollment %}
+    <p class="section-label">— My Enrollment —</p>
+    <h2>{{ enrollment.course.name }}</h2>
+    <p class="auth-card__hint">{{ enrollment.course.track }} · Batch {{ enrollment.batch.name }} · Starts {{ enrollment.batch.start_date }}</p>
+    <div class="notes-grid">
+      <div class="notes-card"><span class="notes-card__track">Notes</span><h4>Course notes</h4><span class="notes-card__cta">Batch content below &darr;</span></div>
+      <div class="notes-card"><span class="notes-card__track">Assessments</span><h4>Batch assessments</h4><span class="notes-card__cta">Submit work below &darr;</span></div>
+    </div>
+    {% else %}
+    <p class="section-label">— Enrollment Pending —</p>
+    <h2>Course access is not assigned yet</h2>
+    <p class="auth-card__hint">Please contact the administrator to assign your course and batch.</p>
+    {% endif %}
+  </section>
+
+  {% if enrollment %}
+  <section class="dash-panel">
+    <p class="section-label">— Batch Content —</p>
+    <h2>Notes and assessments</h2>
+    {% if content %}
+    <div class="notes-grid">
+      {% for item in content %}
+      <div class="notes-card">
+        <span class="notes-card__track">{{ item.type|title }}</span>
+        <h4>{{ item.title }}</h4>
+        {% if item.relative_path %}<a class="notes-card__cta" href="{{ url_for('student_content_download', relative_path=item.relative_path) }}">Open file &rarr;</a>
+        {% elif item.link %}<a class="notes-card__cta" href="{{ item.link }}" target="_blank" rel="noopener">Open link &rarr;</a>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<p class="empty-state">No content has been uploaded for this batch yet.</p>{% endif %}
+  </section>
+
+  <section class="dash-panel">
+    <p class="section-label">— Project Submissions —</p>
+    <h2>Upload your work</h2>
+    <form method="POST" action="{{ url_for('student_work') }}" enctype="multipart/form-data" class="admit-form">
+      <div class="field">
+        <label>Enrolled course</label>
+        <input type="text" value="{{ enrollment.course.name }} — {{ enrollment.batch.name }}" readonly>
+        <input type="hidden" name="course_id" value="{{ enrollment.course.id }}">
+      </div>
+      <div class="field">
+        <label for="work_title">Project title</label>
+        <input type="text" id="work_title" name="title" required>
+      </div>
+      <div class="field field--wide">
+        <label for="work_file">Project file</label>
+        <input type="file" id="work_file" name="work_file" required>
+      </div>
+      <button type="submit" class="btn btn--primary">Upload work</button>
+    </form>
+    {% if submissions %}
+    <h3>My uploads</h3>
+    <div class="table-wrap"><table class="dash-table"><thead><tr><th>Title</th><th>Submitted</th><th>File and teacher review</th></tr></thead><tbody>
+      {% for submission in submissions %}<tr><td>{{ submission.title }}</td><td>{{ submission.submitted_at }}</td><td>{% if submission.relative_path %}<a href="{{ url_for('student_submission_download', submission_id=submission.submission_id, relative_path=submission.relative_path) }}">Download</a>{% endif %}{% for review in submission.reviews %}<div><strong>{{ review.status }}:</strong> {{ review.review }}</div>{% endfor %}</td></tr>{% endfor %}
+    </tbody></table></div>
+    {% endif %}
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

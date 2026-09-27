@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: engineering-design-studio
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    healthCheckPath: /
+    envVars:
+      - key: EDS_SECRET_KEY
+        generateValue: true
+      - key: EDS_ADMIN_PASSWORD
+        sync: false
+      - key: EDS_STUDENT_PASSWORD
+        sync: false
+      - key: EDS_ADMISSIONS_SHEET_ID
+        sync: false
+      - key: EDS_GOOGLE_CREDENTIALS_JSON
+        sync: false

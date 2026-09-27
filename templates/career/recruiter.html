@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recruiter Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('career.static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><img class="eds-logo" src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="EDS logo"><span class="brand-copy"><strong>Recruiter Workspace</strong><span>Admin access</span></span></div>
+  <nav class="top-links"><a href="{{ url_for('career.index') }}">Career page</a></nav>
+</header>
+
+<main class="container">
+  <section class="hero compact-hero">
+    <p class="eyebrow">HIRING WORKSPACE</p>
+    <h1>Candidate performance</h1>
+    <p>Filter completed interviews by the subject closest to the position you are hiring for, then open the full question-by-question review.</p>
+  </section>
+
+  <section class="start-card">
+    <form method="get" class="filter-row">
+      <label>Hiring position or skill
+        <input name="position" value="{{ position }}" placeholder="e.g. Python, AutoCAD, Data">
+      </label>
+      <button class="primary" type="submit">Filter candidates</button>
+      {% if position %}<a class="button" href="{{ url_for('career.recruiter_dashboard') }}">Clear</a>{% endif %}
+    </form>
+  </section>
+
+  <h2>Completed interviews{% if position %} for “{{ position }}”{% endif %}</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Student</th><th>Subject</th><th>Resume skills</th><th>Score</th><th>Completed</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for interview in interviews %}
+        <tr>
+          <td>{{ interview.student_name }}</td>
+          <td>{{ interview.subject.name }}</td>
+          <td>{{ interview.resume.keywords if interview.resume and interview.resume.keywords else "Not provided" }}</td>
+          <td><strong>{{ interview.total_score if interview.total_score is not none else "Pending" }}{% if interview.total_score is not none %}%{% endif %}</strong></td>
+          <td>{{ interview.completed_at.strftime('%Y-%m-%d %H:%M') if interview.completed_at else "-" }}</td>
+          <td><a class="button" href="{{ url_for('career.teacher_review', interview_id=interview.id) }}">View performance</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6">No completed interviews match this position yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <section class="start-card recruiter-form">
+    <h2>Add your interview question</h2>
+    <form method="post">
+      <label>Your name or company
+        <input name="recruiter" required placeholder="e.g. Acme Hiring Team">
+      </label>
+      <label>Subject / position
+        <select name="subject_id" required>
+          {% for subject in subjects %}<option value="{{ subject.id }}">{{ subject.category }} — {{ subject.name }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Question
+        <textarea name="text" rows="3" required placeholder="What would you like candidates to explain?"></textarea>
+      </label>
+      <div class="two-col">
+        <label>Topic<input name="topic" placeholder="Role-specific topic"></label>
+        <label>Difficulty<select name="difficulty"><option>Basic</option><option>Intermediate</option><option>Advanced</option><option>Mixed</option></select></label>
+      </div>
+      <button class="primary">Add question to the bank</button>
+    </form>
+  </section>
+
+  <h2>Recruiter question bank</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Subject</th><th>Topic</th><th>Question</th><th>Added by</th></tr></thead>
+      <tbody>
+      {% for question in recruiter_questions %}
+        <tr><td>{{ question.subject.name }}</td><td>{{ question.topic }}</td><td>{{ question.text }}</td><td>{{ question.created_by }}</td></tr>
+      {% else %}
+        <tr><td colspan="4">No recruiter questions added yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>

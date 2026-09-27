@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}AI Interview — {{ institute.name }}{% endblock %}
+{% block body_class %}page-interview{% endblock %}
+
+{% block content %}
+<main class="dash" style="max-width:720px;margin:3rem auto;">
+  <section class="dash-panel">
+    <p class="section-label">— AI Interview —</p>
+    <h2>Start a mock interview</h2>
+    <form method="POST" action="/interview" style="display:grid;gap:0.8rem;" enctype="multipart/form-data">
+      <label>Role or focus (e.g., Mechanical Designer, Python Developer)</label>
+      <input name="role" placeholder="Role or focus" value="Mechanical Designer">
+
+      <label>Level</label>
+      <select name="level">
+        <option>junior</option>
+        <option>mid</option>
+        <option>senior</option>
+      </select>
+
+      <label>Number of questions</label>
+      <input type="number" name="count" value="5" min="1" max="12">
+
+      <label for="resume">Upload resume (optional)</label>
+      <input type="file" name="resume" id="resume" accept=".pdf,.docx,.txt">
+
+      <button class="btn btn--primary" type="submit" style="margin-top:0.8rem;">Start Interview</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

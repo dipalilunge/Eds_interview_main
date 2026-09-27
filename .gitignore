@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+google_credentials.json
+admissions_local.csv
+.env
+users.json
+batches.json
+student_work/
+course_content/
+*.db
+career_recordings/
+career_resumes/
+tmp_gemini_probe.py

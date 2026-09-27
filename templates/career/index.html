@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EDS Mock Interview</title>
+  <link rel="stylesheet" href="{{ url_for('career.static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><img class="eds-logo" src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="EDS logo"><span class="brand-copy"><strong>Engineering Design Studio</strong><span>Career Practice</span></span></div>
+  <nav class="top-links"><a href="{{ url_for('home') }}">Home</a></nav>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <p class="eyebrow">Make yourself ready for the interview</p>
+    <h1>60-Minute Mock Interview</h1>
+    <p>Look directly into your camera than screen,speak clearly. if you do not answer right away, stay calm and express a willingness to learn.</p>
+  </section>
+
+  <form method="post" action="{{ url_for('career.start_interview') }}" enctype="multipart/form-data" class="start-card">
+    <label>Student Name
+      <input name="student_name" required placeholder="Enter your name">
+    </label>
+
+    <label>Select Subject
+      <select name="subject_id" required>
+        <option value="">Choose a subject</option>
+        {% for category, items in grouped.items() %}
+          <optgroup label="{{ category }}">
+            {% for s in items %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+          </optgroup>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>Resume (optional)
+      <input type="file" name="resume" accept=".pdf,.docx,.txt">
+      <small class="field-hint">Upload once to tailor questions to skills found in your resume.</small>
+    </label>
+
+    <label>College year
+      <select name="year" required>
+        <option value="">Choose your year</option>
+        <option>1st Year</option>
+        <option>2nd Year</option>
+        <option>3rd Year</option>
+        <option>4th Year</option>
+      </select>
+    </label>
+
+    <label>College
+      <input name="college" required maxlength="150" placeholder="Enter your college name">
+    </label>
+
+    <label>Contact number
+      <input name="contact" type="tel" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required placeholder="10-digit mobile number">
+    </label>
+
+    <div class="info-grid">
+      <div><b>60 min</b><span>Interview duration</span></div>
+      <div><b>Video</b><span>Camera + microphone</span></div>
+    </div>
+
+    <button class="primary" type="submit">Start Interview</button>
+  </form>
+</main>
+</body>
+</html>

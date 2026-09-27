@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Start Live Interview — {{ institute.name }}{% endblock %}
+{% block body_class %}page-interview{% endblock %}
+
+{% block content %}
+<main class="dash" style="max-width:720px;margin:3rem auto;">
+  <section class="dash-panel">
+    <p class="section-label">— Live AI Interview —</p>
+    <h2>Choose course and start</h2>
+    <form method="POST" action="/interview" style="display:grid;gap:0.8rem;" enctype="multipart/form-data">
+      <label for="course_id">Course</label>
+      <select name="course_name" id="course_id" required>
+        <option value="" disabled selected>Select a course</option>
+        {% for c in courses %}
+        <option value="{{ c.name }}">{{ c.name }} — {{ c.track }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="duration">Interview duration (minutes)</label>
+      <input type="number" name="duration" id="duration" value="60" min="10" max="180">
+
+      <label for="resume">Upload resume (optional)</label>
+      <input type="file" name="resume" id="resume" accept=".pdf,.docx,.txt">
+
+      <button class="btn btn--primary" type="submit">Start Live Interview</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

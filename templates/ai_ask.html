@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Question — {{ institute.name }}{% endblock %}
+{% block body_class %}page-interview{% endblock %}
+
+{% block content %}
+<main class="dash" style="max-width:720px;margin:3rem auto;">
+  <section class="dash-panel">
+    <p class="section-label">— Interview Question —</p>
+    <h3 style="margin-bottom:0.6rem">Progress: {{ progress }}</h3>
+    <p style="font-size:1.05rem;margin-bottom:1rem">{{ question }}</p>
+    <form method="POST">
+      <label for="answer">Your answer</label>
+      <textarea id="answer" name="answer" rows="6" required style="width:100%;padding:0.6rem;border:1px solid #ddd;border-radius:6px;"></textarea>
+      <div style="display:flex;gap:0.6rem;margin-top:0.8rem;">
+        <button class="btn btn--primary">Submit & Next</button>
+        <a class="btn btn--ghost" href="{{ url_for('interview') }}">Restart</a>
+      </div>
+    </form>
+  </section>
+</main>
+{% endblock %}

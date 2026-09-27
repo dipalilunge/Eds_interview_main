@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Interview - {{ interview.subject.name }}</title>
+  <link rel="stylesheet" href="{{ url_for('career.static', filename='style.css') }}">
+</head>
+<body>
+<header class="interview-head">
+  <div class="brand">
+    <img class="eds-logo" src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="EDS logo">
+    <span class="brand-copy">
+    <strong>{{ interview.subject.name }} Interview</strong>
+    <small>{{ interview.student_name }}</small>
+    {% if interview.resume and interview.resume.keywords %}<small>Skills: {{ interview.resume.keywords }}</small>{% endif %}
+    </span>
+  </div>
+  <div class="timer" id="timer">60:00</div>
+</header>
+
+<main class="interview-layout">
+  <section class="video-card">
+    <video id="preview" autoplay muted playsinline></video>
+    <div class="recording-dot" id="recordingStatus">● Ready</div>
+  </section>
+
+  <section class="question-card">
+    <div class="question-meta">
+      <span id="progress">Question 1 / {{ questions|length }}</span>
+      <span id="topic"></span>
+    </div>
+
+    <h1 id="questionText">{{ questions[0].question.text if questions else "No questions available." }}</h1>
+
+    <div class="controls">
+      <button type="button" id="speakBtn">🔊 Speak Question</button>
+      <button type="button" id="repeatBtn">↻ Repeat</button>
+    </div>
+
+    <div class="answer-controls">
+      <button type="button" class="primary" id="recordBtn">● Start Answer</button>
+      <button type="button" id="stopBtn" disabled>■ Stop Answer</button>
+      <button type="button" id="nextBtn" disabled>Next Question →</button>
+    </div>
+
+    <p class="hint">Allow camera and microphone permissions. Your answer is recorded separately for teacher evaluation.</p>
+  </section>
+</main>
+
+<script>
+const interviewId = {{ interview.id }};
+const questions = {{ questions | map(attribute='id') | list | tojson }};
+const questionData = {{ questions | map(attribute='question') | map(attribute='text') | list | tojson }};
+const topics = {{ questions | map(attribute='question') | map(attribute='topic') | list | tojson }};
+
+let index = 0;
+let stream = null;
+let recorder = null;
+let chunks = [];
+let answerStartedAt = null;
+let elapsed = 0;
+let interviewFinished = false;
+
+const preview = document.getElementById("preview");
+const timerEl = document.getElementById("timer");
+const recordBtn = document.getElementById("recordBtn");
+const stopBtn = document.getElementById("stopBtn");
+const nextBtn = document.getElementById("nextBtn");
+const questionText = document.getElementById("questionText");
+const progress = document.getElementById("progress");
+const topic = document.getElementById("topic");
+const status = document.getElementById("recordingStatus");
+
+async function setupCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+    preview.srcObject = stream;
+  } catch (err) {
+    status.textContent = "● Camera/microphone permission required";
+    alert("Please allow camera and microphone access to start the interview.");
+  }
+}
+
+function speakQuestion() {
+  if (!("speechSynthesis" in window)) {
+    alert("Speech synthesis is not supported by this browser.");
+    return;
+  }
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(questionText.textContent);
+  utterance.lang = "en-IN";
+  utterance.rate = 0.92;
+  speechSynthesis.speak(utterance);
+}
+
+function showQuestion(i) {
+  index = i;
+  questionText.textContent = questionData[i];
+  progress.textContent = `Question ${i + 1} / ${questions.length}`;
+  topic.textContent = topics[i] || "";
+  nextBtn.disabled = true;
+  recordBtn.disabled = false;
+  stopBtn.disabled = true;
+  speakQuestion();
+}
+
+async function uploadAnswer(blob) {
+  const fd = new FormData();
+  fd.append("video", blob, `answer_${questions[index]}.webm`);
+  fd.append("interview_question_id", questions[index]);
+  fd.append("duration", ((Date.now() - answerStartedAt) / 1000).toFixed(1));
+
+  const response = await fetch(`/career/api/interview/${interviewId}/answer`, {
+    method: "POST",
+    body: fd
+  });
+
+  if (!response.ok) {
+    throw new Error("Upload failed");
+  }
+}
+
+recordBtn.addEventListener("click", () => {
+  if (!stream) {
+    alert("Camera/microphone is not ready.");
+    return;
+  }
+
+  chunks = [];
+  const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+    ? "video/webm;codecs=vp9,opus"
+    : "video/webm";
+
+  recorder = new MediaRecorder(stream, {mimeType: mime});
+  recorder.ondataavailable = e => {
+    if (e.data.size > 0) chunks.push(e.data);
+  };
+
+  recorder.onstop = async () => {
+    const blob = new Blob(chunks, {type: "video/webm"});
+    try {
+      status.textContent = "● Uploading answer...";
+      await uploadAnswer(blob);
+      status.textContent = "● Answer saved";
+      nextBtn.disabled = false;
+    } catch (e) {
+      status.textContent = "● Upload failed";
+      alert("Could not save this answer. Please try again.");
+    }
+  };
+
+  answerStartedAt = Date.now();
+  recorder.start(1000);
+  status.textContent = "● Recording";
+  recordBtn.disabled = true;
+  stopBtn.disabled = false;
+});
+
+stopBtn.addEventListener("click", () => {
+  if (recorder && recorder.state !== "inactive") {
+    recorder.stop();
+  }
+  stopBtn.disabled = true;
+});
+
+nextBtn.addEventListener("click", () => {
+  if (index + 1 < questions.length) {
+    showQuestion(index + 1);
+  } else {
+    completeInterview();
+  }
+});
+
+document.getElementById("speakBtn").addEventListener("click", speakQuestion);
+document.getElementById("repeatBtn").addEventListener("click", speakQuestion);
+
+async function completeInterview() {
+  if (interviewFinished) return;
+  interviewFinished = true;
+
+  if (recorder && recorder.state !== "inactive") {
+    recorder.stop();
+    await new Promise(resolve => setTimeout(resolve, 1200));
+  }
+
+  await fetch(`/career/api/interview/${interviewId}/complete`, {method: "POST"});
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  window.location.href = `/career/results/${interviewId}`;
+}
+
+const timer = setInterval(() => {
+  if (interviewFinished) return;
+  elapsed++;
+  const remaining = Math.max(0, 3600 - elapsed);
+  const min = String(Math.floor(remaining / 60)).padStart(2, "0");
+  const sec = String(remaining % 60).padStart(2, "0");
+  timerEl.textContent = `${min}:${sec}`;
+
+  if (remaining === 0) {
+    clearInterval(timer);
+    completeInterview();
+  }
+}, 1000);
+
+setupCamera();
+</script>
+</body>
+</html>

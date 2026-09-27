@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Question Bank</title>
+  <link rel="stylesheet" href="{{ url_for('career.static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><img class="eds-logo" src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="EDS logo"><span class="brand-copy"><strong>EDS Question Bank</strong><span>Add subject-specific interview questions</span></span></div>
+  <a href="{{ url_for('career.index') }}">Career page</a>
+</header>
+
+<main class="container">
+  <section class="start-card">
+    <h2>Add Question</h2>
+    <form method="post">
+      <label>Subject
+        <select name="subject_id" required>
+          {% for s in subjects %}
+            <option value="{{ s.id }}">{{ s.category }} — {{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Question
+        <textarea name="text" rows="4" required placeholder="Enter interview question"></textarea>
+      </label>
+      <label>Topic
+        <input name="topic" placeholder="e.g. OOP, Assembly, Drafting">
+      </label>
+      <label>Difficulty
+        <select name="difficulty">
+          <option>Basic</option>
+          <option>Intermediate</option>
+          <option>Advanced</option>
+          <option>Mixed</option>
+        </select>
+      </label>
+      <button class="primary">Add Question</button>
+    </form>
+  </section>
+
+  <h2>Question Bank</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Subject</th><th>Topic</th><th>Difficulty</th><th>Question</th><th>Created By</th></tr></thead>
+      <tbody>
+      {% for q in questions %}
+        <tr>
+          <td>{{ q.subject.name }}</td>
+          <td>{{ q.topic }}</td>
+          <td>{{ q.difficulty }}</td>
+          <td>{{ q.text }}</td>
+          <td>{{ q.created_by }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>

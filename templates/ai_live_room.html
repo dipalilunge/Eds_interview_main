@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Live Interview — {{ institute.name }}{% endblock %}
+{% block body_class %}page-interview{% endblock %}
+
+{% block extra_head %}
+<style>
+  .video-preview { width: 280px; height: 210px; background: #000; border-radius: 6px; overflow: hidden; }
+  .transcript { border:1px solid #eee;padding:0.6rem;border-radius:6px;height:120px;overflow:auto;background:#fff }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="dash" style="max-width:980px;margin:1.5rem auto;">
+  <section class="dash-panel" style="display:grid;grid-template-columns:300px 1fr;gap:1rem;align-items:start;">
+    <div>
+      <div style="display:flex;flex-direction:column;gap:0.6rem;align-items:center">
+        <div class="video-preview">
+          <video id="localVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover"></video>
+        </div>
+        <div style="text-align:center;margin-top:0.4rem">
+          <div><strong>{{ interview.course_name or interview.role or 'Live Interview' }}</strong></div>
+          <div id="timer" style="color:#666">60:00</div>
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <p class="section-label">— Transcript (voice assistant)</p>
+        <div class="transcript" id="transcript"></div>
+      </div>
+      <div style="margin-top:0.8rem;display:flex;gap:0.5rem">
+        <button id="startRec" class="btn btn--primary">Start recording</button>
+        <button id="stopRec" class="btn btn--ghost">Stop</button>
+        <button id="quitBtn" class="btn">Quit</button>
+      </div>
+    </div>
+
+    <div>
+      <p class="section-label">— Interview Questions</p>
+      <div id="questionArea">
+        <!-- question and controls injected by JS -->
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+  window.INTERVIEW = {{ interview|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/live_interview.js') }}"></script>
+{% endblock %}

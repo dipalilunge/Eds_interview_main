@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block title %}Admissions — {{ institute.name }}{% endblock %}
+{% block body_class %}page-dashboard{% endblock %}
+
+{% block content %}
+<header class="dash-nav">
+  <a class="nav__brand" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="{{ institute.name }} logo">
+    <span>{{ institute.name }}</span>
+  </a>
+  <div class="dash-nav__right">
+    <a href="{{ url_for('career.teacher_dashboard') }}" class="btn btn--ghost btn--small">Interview reviews</a>
+    <a href="{{ url_for('career.recruiter_dashboard') }}" class="btn btn--ghost btn--small">Recruiter workspace</a>
+    <a href="{{ url_for('career.question_admin') }}" class="btn btn--ghost btn--small">Question bank</a>
+    <span class="sync-pill {{ 'sync-pill--live' if using_sheets else 'sync-pill--local' }}">
+      {{ "● Synced to Google Sheets" if using_sheets else "● Saving locally (Sheets not configured)" }}
+    </span>
+    <a href="{{ url_for('admin_logout') }}" class="btn btn--ghost btn--small">Log out</a>
+  </div>
+</header>
+
+<main class="dash">
+  <section class="dash-panel">
+    <p class="section-label">— Batch Management —</p>
+    <h2>Create a batch</h2>
+    <form method="POST" class="admit-form">
+      <input type="hidden" name="action" value="create_batch">
+      <div class="field">
+        <label for="batch_course_id">Course</label>
+        <select id="batch_course_id" name="batch_course_id" required>
+          <option value="" disabled selected>Select a course</option>
+          {% for c in courses %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="batch_name">Batch name</label>
+        <input type="text" id="batch_name" name="batch_name" placeholder="e.g. EDS-PD-01" required>
+      </div>
+      <div class="field">
+        <label for="start_date">Start date</label>
+        <input type="date" id="start_date" name="start_date" required>
+      </div>
+      <div class="field">
+        <label for="batch_fee">Batch fee (₹)</label>
+        <input type="number" id="batch_fee" name="batch_fee" min="0" step="1" required>
+      </div>
+      <button type="submit" class="btn btn--primary">Create batch</button>
+    </form>
+    {% if batches %}
+    <div class="table-wrap">
+      <table class="dash-table">
+        <thead><tr><th>Batch</th><th>Course</th><th>Start</th><th>Fee</th><th>Drive Folder</th></tr></thead>
+        <tbody>
+          {% for b in batches|reverse %}
+          <tr>
+            <td>{{ b.name }}</td>
+            <td>{{ b.course_id }}</td>
+            <td>{{ b.start_date }}</td>
+            <td>₹{{ b.fee }}</td>
+            <td>
+              {% if b.drive_folder_url %}
+              <a href="{{ b.drive_folder_url }}" target="_blank" rel="noopener">Open</a>
+              {% else %}
+              <span>Not configured</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="dash-panel">
+    <p class="section-label">— Batch Content —</p>
+    <h2>Upload notes or assessments</h2>
+    <form method="POST" enctype="multipart/form-data" class="admit-form">
+      <input type="hidden" name="action" value="upload_content">
+      <div class="field"><label for="content_batch_id">Batch</label><select id="content_batch_id" name="content_batch_id" required><option value="" disabled selected>Select a batch</option>{% for b in batches %}<option value="{{ b.id }}">{{ b.name }} — {{ b.course_id }}</option>{% endfor %}</select></div>
+      <div class="field"><label for="content_type">Content type</label><select id="content_type" name="content_type"><option value="notes">Notes</option><option value="assessment">Assessment</option></select></div>
+      <div class="field"><label for="content_title">Title</label><input id="content_title" name="content_title" required></div>
+      <div class="field"><label for="content_file">File</label><input id="content_file" type="file" name="content_file"></div>
+      <div class="field field--wide"><label for="content_link">Or external link</label><input id="content_link" type="url" name="content_link" placeholder="https://..."></div>
+      <button type="submit" class="btn btn--primary">Publish content</button>
+    </form>
+    {% if content %}<div class="table-wrap"><table class="dash-table"><thead><tr><th>Title</th><th>Type</th><th>Batch</th><th>Published</th></tr></thead><tbody>{% for item in content %}<tr><td>{{ item.title }}</td><td>{{ item.type|title }}</td><td>{{ item.batch_id }}</td><td>{{ item.uploaded_at }}</td></tr>{% endfor %}</tbody></table></div>{% endif %}
+  </section>
+
+  <section class="dash-panel">
+    <p class="section-label">— New Admission —</p>
+    <h2>Register a student</h2>
+    <form method="POST" class="admit-form">
+      <div class="field">
+        <label for="student_name">Student name</label>
+        <input type="text" id="student_name" name="student_name" required>
+      </div>
+
+      <div class="field">
+        <label for="course_id">Course</label>
+        <select id="course_id" name="course_id" required>
+          <option value="" disabled selected>Select a course</option>
+          {% for c in courses %}
+          <option value="{{ c.id }}" data-fee="{{ c.fee }}">{{ c.name }} — {{ c.track }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="course_fee_display">Course fee</label>
+        <input type="number" id="course_fee" name="course_fee" min="0" step="1" placeholder="Editable fee" required>
+      </div>
+
+      <div class="field">
+        <label for="batch_id">Batch</label>
+        <select id="batch_id" name="batch_id">
+          <option value="">No batch selected</option>
+          {% for b in batches %}
+          <option value="{{ b.id }}" data-course="{{ b.course_id }}" data-fee="{{ b.fee }}">{{ b.name }} — ₹{{ b.fee }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="payment_method">Payment method</label>
+        <select id="payment_method" name="payment_method" required>
+          <option value="Cash">Cash</option>
+          <option value="Online">Online (card/netbanking)</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="transaction_id">Transaction ID (if paid online/UPI/transfer)</label>
+        <input type="text" id="transaction_id" name="transaction_id" placeholder="Txn ID or reference">
+      </div>
+
+      <div class="field">
+        <label for="aadhar_number">Aadhar number</label>
+        <input type="text" id="aadhar_number" name="aadhar_number" inputmode="numeric" maxlength="12" placeholder="12-digit number" required>
+      </div>
+
+      <div class="field">
+        <label for="college_name">College name</label>
+        <input type="text" id="college_name" name="college_name" required>
+      </div>
+
+      <div class="field">
+        <label for="mobile_number">Mobile number</label>
+        <input type="text" id="mobile_number" name="mobile_number" inputmode="numeric" maxlength="10" placeholder="10-digit number" required>
+      </div>
+
+      <div class="field field--wide">
+        <label for="address">Address</label>
+        <textarea id="address" name="address" rows="2" required></textarea>
+      </div>
+
+      <div class="field field--wide">
+        <label for="placement_details">Placement details <span>(optional, filled after placement)</span></label>
+        <textarea id="placement_details" name="placement_details" rows="2"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn--primary">Save admission</button>
+    </form>
+  </section>
+
+  <section class="dash-panel">
+    <p class="section-label">— Recent Entries —</p>
+    <h2>Latest admissions</h2>
+    {% if recent %}
+    <div class="table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Fee</th>
+            <th>Mobile</th>
+            <th>College</th>
+            <th>Placement</th>
+            <th>Payment</th>
+            <th>Txn ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent %}
+          <tr>
+            <td>{{ r['Student Name'] }}</td>
+            <td>{{ r['Course Name'] }}</td>
+            <td>₹{{ r['Course Fees'] }}</td>
+            <td>{{ r['Mobile Number'] }}</td>
+            <td>{{ r['College Name'] }}</td>
+            <td>{{ r['Placement Details'] or "—" }}</td>
+            <td>{{ r.get('Payment Method', 'Cash') }}</td>
+            <td>{{ r.get('Transaction ID', '—') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No admissions recorded yet — the first one you save will show up here.</p>
+    {% endif %}
+  </section>
+
+  <section class="dash-panel">
+    <p class="section-label">— Student Work —</p>
+    <h2>Uploaded projects</h2>
+    {% if submissions %}
+    <div class="table-wrap">
+      <table class="dash-table">
+        <thead><tr><th>Student</th><th>Title</th><th>Course</th><th>Submitted</th><th>File</th></tr></thead>
+        <tbody>
+          {% for submission in submissions %}
+          <tr>
+            <td>{{ submission.student_name }}</td>
+            <td>{{ submission.title }}</td>
+            <td>{{ submission.course_id }}</td>
+            <td>{{ submission.submitted_at }}</td>
+            <td><a href="{{ url_for('admin_work_download', stored_name=submission.relative_path or submission.stored_name) }}">Download</a></td>
+          </tr>
+          <tr><td colspan="5"><form method="POST" class="admit-form"><input type="hidden" name="action" value="review_submission"><input type="hidden" name="submission_id" value="{{ submission.submission_id }}"><input name="teacher_name" placeholder="Teacher name"><input name="teacher_review" placeholder="Review feedback" required><select name="review_status"><option>Reviewed</option><option>Needs changes</option><option>Approved</option></select><button class="btn btn--secondary" type="submit">Save review</button></form>{% for review in submission.reviews %}<p><strong>{{ review.teacher }} ({{ review.status }}):</strong> {{ review.review }}</p>{% endfor %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="empty-state">No student work uploaded yet.</p>{% endif %}
+  </section>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const courseSelect = document.getElementById('course_id');
+  const feeDisplay = document.getElementById('course_fee');
+  const batchSelect = document.getElementById('batch_id');
+  courseSelect.addEventListener('change', () => {
+    const opt = courseSelect.selectedOptions[0];
+    const batch = Array.from(batchSelect.options).find(option => option.dataset.course === courseSelect.value);
+    feeDisplay.value = batch ? batch.dataset.fee : (opt && opt.dataset.fee ? opt.dataset.fee : '');
+    batchSelect.value = batch ? batch.value : '';
+  });
+  batchSelect.addEventListener('change', () => {
+    const opt = batchSelect.selectedOptions[0];
+    if (opt && opt.dataset.fee) feeDisplay.value = opt.dataset.fee;
+  });
+
+  // Toggle transaction ID requirement based on payment method
+  const paymentMethod = document.getElementById('payment_method');
+  const transactionField = document.getElementById('transaction_id');
+  function toggleTxn() {
+    const val = paymentMethod.value || '';
+    if (val.toLowerCase() === 'cash') {
+      transactionField.removeAttribute('required');
+      transactionField.parentElement.style.opacity = '0.9';
+    } else {
+      transactionField.setAttribute('required', 'required');
+      transactionField.parentElement.style.opacity = '1';
+    }
+  }
+  paymentMethod.addEventListener('change', toggleTxn);
+  toggleTxn();
+</script>
+{% endblock %}
