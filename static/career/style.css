@@ -47,6 +47,14 @@ video{width:100%;border-radius:12px;background:#111;aspect-ratio:16/10;object-fi
 table{width:100%;border-collapse:collapse;min-width:700px}
 th,td{text-align:left;padding:13px;border-bottom:1px solid var(--line);vertical-align:top}
 th{background:#f1f5f2}
+.student-summary{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:22px;box-shadow:0 10px 30px rgba(20,40,30,.05)}
+.student-summary h2{margin:0 0 18px;font-size:28px}
+.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:16px}
+.summary-grid div,.resume-block{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#fbfdfb}
+.label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px;font-weight:700}
+.summary-grid strong,.resume-block p{display:block;font-size:15px;line-height:1.5;color:var(--dark)}
+.resume-block{margin-top:16px}
+.muted-block{background:#f8f9f8}
 .review-card{margin-bottom:20px}
 .answer-video{max-width:720px;margin:10px 0}
 .score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}

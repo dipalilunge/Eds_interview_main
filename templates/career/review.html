@@ -13,6 +13,48 @@
 </header>
 
 <main class="container">
+  <section class="student-summary">
+    <h2>Student Information</h2>
+    <div class="summary-grid">
+      <div>
+        <span class="label">Student name</span>
+        <strong>{{ interview.student_name }}</strong>
+      </div>
+      <div>
+        <span class="label">Subject</span>
+        <strong>{{ interview.subject.name }}</strong>
+      </div>
+      <div>
+        <span class="label">College year</span>
+        <strong>{{ interview.year or "Not provided" }}</strong>
+      </div>
+      <div>
+        <span class="label">College</span>
+        <strong>{{ interview.college or "Not provided" }}</strong>
+      </div>
+      <div>
+        <span class="label">Contact number</span>
+        <strong>{{ interview.contact or "Not provided" }}</strong>
+      </div>
+      <div>
+        <span class="label">Interview status</span>
+        <strong>{{ interview.status }}</strong>
+      </div>
+    </div>
+
+    {% if interview.resume and interview.resume.keywords %}
+      <div class="resume-block">
+        <span class="label">Resume skills detected</span>
+        <p>{{ interview.resume.keywords }}</p>
+      </div>
+    {% else %}
+      <div class="resume-block muted-block">
+        <span class="label">Resume</span>
+        <p>No resume uploaded.</p>
+      </div>
+    {% endif %}
+  </section>
+
   {% for iq in questions %}
   <article class="review-card">
     <div class="question-meta">
